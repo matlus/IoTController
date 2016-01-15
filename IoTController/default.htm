@@ -1,0 +1,76 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Turn remote lights on and off via the Internet">
+    <meta name="author" content="Shiv Kumar">
+    <title>IoT Webserver - Light Controller</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.0/css/bootstrap-toggle.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>IoT Light Controller</h1>
+        <div class="checkbox">
+            <canvas id="redCanvas" width="35" height="35" style="float: left; padding-right: 100px;"></canvas>
+            <input id="redSwitch" type="checkbox" data-toggle="toggle">
+        </div>
+        <div id="toggleEvent"></div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.0/js/bootstrap-toggle.min.js"></script>
+    <script>
+        drawLight('redCanvas', 'white')
+
+
+        $(function () {
+            $('#redSwitch').change(function () {
+                sendLightCommand("red", $(this).prop('checked'), 'redCanvas')
+            })
+        })
+
+        function sendLightCommand(lightColor, state, targetElement) {
+            $.ajax({
+                url: "lights?color=" + lightColor + "&state=" + state,
+                type: "GET",
+                cache: false,
+
+                success: function (result) {
+                    var fillColor = "white";
+                    if (state === true && targetElement === "redCanvas") {
+                        fillColor = "red";
+                    }
+                    else if (state === true && targetElement === "greenCanvas") {
+                        fillColor = "green";
+                    }
+
+                    drawLight(targetElement, fillColor);
+                },
+
+                error: function (xhr, textStatus, errorThrown) {
+
+                }
+            });
+        }
+
+        function drawLight(elementId, fillColor) {
+            var canvas = document.getElementById(elementId);
+            var context = canvas.getContext('2d');
+            var centerX = canvas.width / 2;
+            var centerY = canvas.height / 2;
+            var radius = 16;
+
+            context.beginPath();
+            context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+            context.fillStyle = fillColor;
+            context.fill();
+            context.lineWidth = 2;
+            context.strokeStyle = '#003300';
+            context.stroke();
+        }
+    </script>
+</body>
+</html>
